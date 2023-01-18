@@ -42,9 +42,8 @@ let score = [
 ];
 let nombreDesLance = 5;
 let tableauDesLancer = [];
-nbLancerTotal = 0;
-
-
+let nbLancerTotal = 0;
+let chance = false ;
 //function qui selectionne tous les des sur le plateau
 function selectionnerTousLesDes() {
     //reset le result
@@ -55,28 +54,29 @@ function selectionnerTousLesDes() {
     addInTheTableSelect();
 }
 
+
+/**
+ * function qui permet de lancer les dés
+ */
 function lancerDes() {
     //vide le plateaux
     tableauDesLancer = [];
     document.getElementById("des_lancer").innerHTML = "";
+    console.log(nombreDesLance);
     for (let i = 0; i < nombreDesLance; i++) {
         let de = Math.floor(Math.random() * 6) + 1;
-        // if (i >= 4){
-        //     de = 2
-        // }
         //avec le nb aléatoite recupérer le nom du  dé
         let nomDe = tableauDes.find(function (element) {
             return element.id === de;
         });
-        //reset le tableau des dés selectionner
-
+        console.log("pe")
         //add le dé dans le tableau
         tableauDesLancer.push(nomDe);
+        console.log(tableauDesLancer);
         document.getElementById("des_lancer").innerHTML += "<img id='" + i + "' class='des' src='C:\\Users\\chris\\OneDrive\\Bureau\\IUT\\FrameworkJS\\Yams\\asset\\" + nomDe.valeur + "' alt='dé' class='de'>";
     }
 
 }
-
 
 
 /**
@@ -93,6 +93,9 @@ function addScore(node) {
             }
         } else {
             if (element.id === node.parentNode.id && element.valeur === 0) {
+                if(element.id === "chance"){
+                    chance = true;
+                }
                 element.valeur = dePoints.filter((point) => {
                     return point.id === element.id
                 })[0].valeur
@@ -102,10 +105,12 @@ function addScore(node) {
     })
     addInTheTableSelectScore();
 }
+
 /**
  * function qui affiche le résultat des point choisi
  * */
 function addInTheTableSelectScore() {
+    console.log("addInTheTableSelectScore");
     score.forEach((element) => {
         $("#des" + element.id).html(element.valeur);
         //si element.id et un string alors
@@ -113,7 +118,23 @@ function addInTheTableSelectScore() {
             $("#" + element.id).html(element.valeur);
         }
     })
+    nbLancerTotal = 0;
+    document.getElementById("lancer").disabled = false;
+    //reset la balise
+    document.getElementById("des_lancer").innerHTML = "";
+    //reset le tableau des dés selectionner
+    tableauDesSelec = [];
+    //reset le tableau des dés selectionner
+    tableauDesLancer = [];
+    //reset le plateau des dés
+    console.log("reset");
+    document.getElementById("select").innerHTML = "";
+    //reset le nombre de dés à lancer
+    nombreDesLance = 5;
+    console.log(nombreDesLance);
+
 }
+
 //fonction qui permet de selectionner les dés
 function selectionnerDe(id) {
     let de = document.getElementById(id);
@@ -160,7 +181,9 @@ function AttributionFull() {
             if (!(tableauDesSelec.filter((e) => e.id === des.id).length >= 4) && !(tableauDesSelec.filter((e) => e.id === des.id).length === 1)) {
                 dePoints.forEach((element) => {
                     if (element.id === "full") {
-                        element.valeur = 25
+                        if (element.valeur === 0) {
+                            element.valeur = 25
+                        }
                     }
                 })
             }
@@ -178,14 +201,18 @@ function AttributionBrelan() {
     if (tableauDesSelec.filter((e) => e.id === tableauDesSelec[0].id).length === 3) {
         dePoints.forEach((element) => {
             if (element.id === "brelan") {
-                element.valeur = 20
+                if (element.valeur === 0) {
+                    element.valeur = 20
+                }
             }
         })
     }
     affichageTableauScore();
 }
 
-
+/**
+ * function qui determine si il y a un yams ou pas
+ * */
 function isUnique(item, position, array) {
     return array.indexOf(item) === position;
 }
@@ -197,7 +224,9 @@ function AttributionYams() {
     if (new Set(tableauDesSelec).size === 1) {
         dePoints.forEach((element) => {
             if (element.id === "yams") {
-                element.valeur = "50"
+                if (element.valeur === 0) {
+                    element.valeur = "50"
+                }
             }
         })
     }
@@ -246,7 +275,10 @@ function AttributionGrPtSuite() {
     if (desSuite.length >= 4 && suisSuite) {
         dePoints.forEach((element) => {
             if (element.id === "petiteSuite") {
-                element.valeur = 25
+                if (element.valeur === 0) {
+                    element.valeur = 25
+                }
+
             }
         })
 
@@ -255,7 +287,10 @@ function AttributionGrPtSuite() {
 
         dePoints.forEach((element) => {
             if (element.id === "grandeSuite") {
-                element.valeur = 40
+                if (element.valeur === 0) {
+                    element.valeur = 40
+                }
+
             }
         })
     }
@@ -277,8 +312,14 @@ function AttributionSimple() {
                 element.valeur = +element.valeur + +deSelect.id
                 pointTotal = +deSelect.id + +pointTotal;
             }
+
             if (element.id === 'chance') {
-                element.valeur = pointTotal
+                if (chance === false) {
+                    element.valeur = pointTotal
+
+                }
+
+
             }
         })
         //si il y a 4 element pareil dans l'array
@@ -286,7 +327,9 @@ function AttributionSimple() {
         if (tableauDesSelec.filter((e) => e.id === deSelect.id).length >= 4) {
             dePoints.forEach((element) => {
                 if (element.id === 'carre') {
-                    element.valeur = pointTotal
+                    if (element.valeur === 0) {
+                        element.valeur = pointTotal
+                    }
                 }
             })
         }
@@ -313,8 +356,10 @@ function affichageTableauScore() {
 $(document).ready(function () {
     //quand on clique sur le bouton lancer le jeu lance les des
     $("#lancer").click(function () {
+        console.log("lancer")
         if (nbLancerTotal < 2) {
             lancerDes();
+            console.log("passe")
         } else {
             //on lance les des
             alert("Vous avez lancé les dés deux fois");
