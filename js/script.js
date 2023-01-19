@@ -38,12 +38,13 @@ let score = [
     {id: "grandeSuite", valeur: 0},
     {id: "yams", valeur: 0},
     {id: "chance", valeur: 0}
-
 ];
+let chance = false;
+let carrer = false;
 let nombreDesLance = 5;
 let tableauDesLancer = [];
 let nbLancerTotal = 0;
-let chance = false ;
+
 //function qui selectionne tous les des sur le plateau
 function selectionnerTousLesDes() {
     //reset le result
@@ -62,17 +63,17 @@ function lancerDes() {
     //vide le plateaux
     tableauDesLancer = [];
     document.getElementById("des_lancer").innerHTML = "";
-    console.log(nombreDesLance);
+
     for (let i = 0; i < nombreDesLance; i++) {
         let de = Math.floor(Math.random() * 6) + 1;
         //avec le nb aléatoite recupérer le nom du  dé
         let nomDe = tableauDes.find(function (element) {
             return element.id === de;
         });
-        console.log("pe")
+
         //add le dé dans le tableau
         tableauDesLancer.push(nomDe);
-        console.log(tableauDesLancer);
+
         document.getElementById("des_lancer").innerHTML += "<img id='" + i + "' class='des' src='C:\\Users\\chris\\OneDrive\\Bureau\\IUT\\FrameworkJS\\Yams\\asset\\" + nomDe.valeur + "' alt='dé' class='de'>";
     }
 
@@ -93,31 +94,45 @@ function addScore(node) {
             }
         } else {
             if (element.id === node.parentNode.id && element.valeur === 0) {
-                if(element.id === "chance"){
-                    chance = true;
-                }
                 element.valeur = dePoints.filter((point) => {
                     return point.id === element.id
                 })[0].valeur
             }
         }
-
     })
     addInTheTableSelectScore();
 }
 
 /**
- * function qui affiche le résultat des point choisi
+ * function qui affiche le résultat des point choisi et reset le tableau des selectionner
  * */
 function addInTheTableSelectScore() {
-    console.log("addInTheTableSelectScore");
     score.forEach((element) => {
+        //si le score est selectionner et que le passage est false alors on affiche le score
+
         $("#des" + element.id).html(element.valeur);
         //si element.id et un string alors
         if (typeof element.id === 'string') {
             $("#" + element.id).html(element.valeur);
         }
+
+        if (score.filter((element) => {return element.valeur === 0}).length === 0) {
+            //affiche le bouton de fin de partie
+            document.getElementById("fin").style.display = "block";
+            $("#Rdes" + element.id).html(element.valeur);
+            //si element.id et un string alors
+            if (typeof element.id === 'string') {
+                $("#R" + element.id).html(element.valeur);
+            }
+        }
     })
+    //enregistrer le score dans le local storage en clé la date et heure au moment d'enregistrement et en valeur le score qui s'appelle scoreMemory
+    localStorage.setItem(new Date().toLocaleString(), JSON.stringify(score));
+    $("#scoreSave").append("<tr><td>" + new Date().toLocaleString() + "</td>");
+    score.forEach((element) => {
+        $("#scoreSave").append("<td>" + element.valeur + "</td>");
+    })
+    $("#scoreSave").append("</tr>");
     nbLancerTotal = 0;
     document.getElementById("lancer").disabled = false;
     //reset la balise
@@ -126,12 +141,13 @@ function addInTheTableSelectScore() {
     tableauDesSelec = [];
     //reset le tableau des dés selectionner
     tableauDesLancer = [];
+    let chance = false;
+    let carrer = false;
     //reset le plateau des dés
-    console.log("reset");
     document.getElementById("select").innerHTML = "";
     //reset le nombre de dés à lancer
     nombreDesLance = 5;
-    console.log(nombreDesLance);
+
 
 }
 
@@ -267,7 +283,6 @@ function AttributionGrPtSuite() {
         }
     }
     desSuite = desSuite.filter(isUnique)
-    console.log(desSuite)
     //tester si les chiffre se suis
     let suisSuite = false;
     suisSuite = desSuite.map((des) => des.id).every((id, index, array) => index === 0 || id === array[index - 1] + 1);
@@ -308,26 +323,26 @@ function AttributionSimple() {
     let pointTotal = 0;
     tableauDesSelec.forEach((deSelect) => {
         dePoints.forEach((element) => {
+            //si aussi le score dans le tableaux score est a 0
             if (deSelect.id === element.id) {
                 element.valeur = +element.valeur + +deSelect.id
+
                 pointTotal = +deSelect.id + +pointTotal;
             }
 
             if (element.id === 'chance') {
+
                 if (chance === false) {
                     element.valeur = pointTotal
-
                 }
-
-
             }
         })
         //si il y a 4 element pareil dans l'array
-
         if (tableauDesSelec.filter((e) => e.id === deSelect.id).length >= 4) {
             dePoints.forEach((element) => {
                 if (element.id === 'carre') {
-                    if (element.valeur === 0) {
+
+                    if (carrer ===  false) {
                         element.valeur = pointTotal
                     }
                 }
@@ -342,6 +357,7 @@ function AttributionSimple() {
  * affiche dans le tableau des les scores apres chaque lancer
  * */
 function affichageTableauScore() {
+    //affiche les points dans le tableau des scores si le score est pas deja en true dans passage
     dePoints.map((element) => {
         $("#des" + element.id).html(element.valeur + "<button id='addScore' onclick='addScore(this)'>Valider</button>");
         //si element.id et un string alors
@@ -356,10 +372,8 @@ function affichageTableauScore() {
 $(document).ready(function () {
     //quand on clique sur le bouton lancer le jeu lance les des
     $("#lancer").click(function () {
-        console.log("lancer")
         if (nbLancerTotal < 2) {
             lancerDes();
-            console.log("passe")
         } else {
             //on lance les des
             alert("Vous avez lancé les dés deux fois");
